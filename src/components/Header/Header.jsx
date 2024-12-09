@@ -2,12 +2,14 @@ import { Link, NavLink } from "react-router-dom";
 import styles from "./styles.module.css";
 import Logout from "../Logout/Logout";
 import { setActive } from "../../helpers/setActive";
+import { CurrencyRate } from "../CurrencyRate/CurrencyRate";
 
 export const Header = () => {
   return (
     <header className={styles.header}>
       <div className={styles.container}>
         <Link to="/">News Profile</Link>
+        <CurrencyRate />
         <nav className={styles.nav}>
           <NavLink to="/profile" className={setActive}>
             Профиль

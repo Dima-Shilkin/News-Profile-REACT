@@ -4,7 +4,6 @@ export const useForm = (initialValues, validate) => {
   const [formData, setFormData] = useState(initialValues);
   const [formError, setFormError] = useState(false);
 
-  // Обработчик изменения значения инпута
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -26,7 +25,6 @@ export const useForm = (initialValues, validate) => {
     setFormData(initialValues);
   };
 
-  // Обработчик отправки формы
   const handlerSubmit = (e) => {
     e.preventDefault();
 

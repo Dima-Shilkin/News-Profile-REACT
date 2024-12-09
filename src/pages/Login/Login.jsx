@@ -7,23 +7,23 @@ import styles from "./styles.module.css";
 import { Input } from "../../components/Input/Input";
 import { useNavigate, useLocation } from "react-router-dom";
 
+const initialValues = {
+  login: "",
+  password: "",
+};
+
+const validate = (formData) => {
+  const errorMessage = formValidationAuth(formData, (login, password) =>
+    AuthService.isLoginUserValid(login, password, AUTH_CREDENTIALS)
+  );
+  if (errorMessage) {
+    toast.error(errorMessage);
+    return errorMessage;
+  }
+  return null;
+};
+
 export const Login = () => {
-  const initialValues = {
-    login: "",
-    password: "",
-  };
-
-  const validate = (formData) => {
-    const errorMessage = formValidationAuth(formData, (login, password) =>
-      AuthService.isLoginUserValid(login, password, AUTH_CREDENTIALS)
-    );
-    if (errorMessage) {
-      toast.error(errorMessage);
-      return errorMessage;
-    }
-    return null;
-  };
-
   const { formData, formError, handleChange, handlerSubmit, handlerBlur } =
     useForm(initialValues, validate);
 

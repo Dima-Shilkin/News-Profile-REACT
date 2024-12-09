@@ -11,6 +11,7 @@ export const Input = ({
   error,
   onBlur,
   className,
+  readOnly,
 }) => {
   return (
     <>
@@ -24,6 +25,7 @@ export const Input = ({
         type={type}
         className={`${className} ${error ? styles.error : ""}`}
         onBlur={onBlur}
+        readOnly={readOnly}
       />
     </>
   );

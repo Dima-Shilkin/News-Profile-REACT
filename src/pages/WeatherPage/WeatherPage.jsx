@@ -1,11 +1,14 @@
 import styles from "./styles.module.css";
 import { Input } from "../../components/Input/Input";
 import Loader from "../../components/Loader/Loader";
-import { useFetch } from "../../hooks/useFetch";
-import { getWeatherData } from "../../api/api";
-import { TempIcon } from "../../components/common/Icons/TempIcon";
 import { useForm } from "../../hooks/useForm";
 import toast from "react-hot-toast";
+import { useState } from "react";
+import { getWeatherData } from "../../api/api";
+import { IncorrectData } from "../../components/IncorrectData/IncorrectData";
+import { CardWeather } from "../../components/CardWeather/CardWeather";
+import { LastRequestCard } from "../../components/LastRequestCard/LastRequestCard";
+import { saveCityToLocalStorage } from "../../helpers/LSforWeather";
 
 export const WeatherPage = () => {
   const initialValues = { city: "" };
@@ -20,26 +23,40 @@ export const WeatherPage = () => {
 
   const { formData, formError, handleChange, handlerSubmit, resetForm } =
     useForm(initialValues, validate);
-  const { data, isLoading, error } = useFetch(getWeatherData, "Москва");
-  //вот тут если передаю в виде строки значения, то все ок.
-  console.log(data);
+  const [weatherData, setWeatherData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
 
-  const onSubmit = (e) => {
+  const fetchWeatherData = async (city) => {
+    setIsError(false);
+    setIsLoading(true);
+
+    try {
+      const data = await getWeatherData(city);
+      setWeatherData(data);
+      saveCityToLocalStorage(city);
+    } catch (err) {
+      console.log(`Ошибка: ${err}`);
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+
     handlerSubmit(e);
 
     if (!formError) {
-      toast.success(`Ищем погоду для города: ${formData.city}`);
+      await fetchWeatherData(formData.city);
       resetForm();
     }
   };
 
-  if (error) {
-    return <p>{error}</p>;
-  }
-
-  if (isLoading || !data) {
-    return <Loader />;
-  }
+  const handleCityClick = async (city) => {
+    await fetchWeatherData(city);
+  };
 
   return (
     <>
@@ -53,27 +70,15 @@ export const WeatherPage = () => {
             onChange={handleChange}
           />
         </form>
-        {data && (
-          <div className={styles.cardWeather}>
-            <div className={styles.cardWeather_left}>
-              <img
-                className={styles.weatherImg}
-                src={`https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`}
-                alt=""
-              />
-              <div>
-                <h3>{data.name}</h3>
-                <span>{data.weather[0].description}</span>
-              </div>
-            </div>
-            <div className={styles.cardWeather_right}>
-              <TempIcon className={styles.tempImg} />
-              <span> {data.main.temp.toFixed(0)} ℃</span>
-            </div>
-          </div>
-        )}
+        {isLoading ? (
+          <Loader />
+        ) : isError ? (
+          <IncorrectData />
+        ) : weatherData ? (
+          <CardWeather weatherData={weatherData} />
+        ) : null}
       </div>
-      <h2>Последние запросы</h2>
+      <LastRequestCard handleCityClick={handleCityClick} />
     </>
   );
 };
