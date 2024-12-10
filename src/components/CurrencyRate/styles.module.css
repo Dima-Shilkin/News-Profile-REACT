@@ -1,5 +1,10 @@
 .currencyRate {
-  padding: 5px;
-  border: 1px solid black;
   font-style: italic;
+  position: relative;
+}
+
+.val {
+  border: 1px solid black;
+  border-radius: 8px;
+  padding: 5px;
 }

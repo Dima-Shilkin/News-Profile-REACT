@@ -15,8 +15,13 @@ export const getWeatherData = async (location) => {
   const response = await axios.get(
     `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${KEYweather}&units=metric&lang=ru`
   );
-
-  return response.data;
+  const { main, name, weather } = response.data;
+  return {
+    temperature: main.temp,
+    name,
+    description: weather[0].description,
+    img: weather[0].icon,
+  };
 };
 
 //для популярных валют
@@ -38,7 +43,7 @@ export const getPairConversion = async (from, to) => {
   const response = await axios.get(
     `https://v6.exchangerate-api.com/v6/${KEYexchange}/pair/${from}/${to}`
   );
-  return response;
+  return response.data.conversion_rate;
 };
 
 // для списка всех валют (в селект)

@@ -1,50 +1,50 @@
 import styles from "./styles.module.css";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { getCurrenciesList, getPairConversion } from "../../api/api";
 import { Input } from "../Input/Input";
 import { SecectS } from "../common/SecectS/SecectS";
 import toast from "react-hot-toast";
+import { useFetch } from "../../hooks/useFetch";
+import Loader from "../Loader/Loader";
 
 export const CurrencyCalculate = () => {
-  const [currencies, setCurrencies] = useState([]);
-  const [amount, setAmount] = useState("");
-  const [fromCurrency, setFromCurrency] = useState("");
-  const [toCurrency, setToCurrency] = useState("");
-  const [result, setResult] = useState(null);
+  const [currencyState, setCurrencyState] = useState({
+    amount: "",
+    from: "USD",
+    to: "RUB",
+  });
+  const [rate, setRate] = useState(null);
 
-  useEffect(() => {
-    const fetchCurrenciesList = async () => {
-      try {
-        const data = await getCurrenciesList();
-        setCurrencies(data);
-        if (data.length > 0) {
-          setFromCurrency("USD");
-          setToCurrency("RUB");
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchCurrenciesList();
-  }, []);
+  const { data: currencies, isLoading, error } = useFetch(getCurrenciesList);
 
   const handleCalculate = async () => {
-    if (!amount || !fromCurrency || !toCurrency) {
+    const { amount, from, to } = currencyState;
+    if (!amount || !from || !to) {
       toast.error("Пожалуйста, заполините все поля");
       return;
     }
 
     try {
-      const data = await getPairConversion(fromCurrency, toCurrency);
-      const rate = data.data.conversion_rate;
-
-      const convertedAmount = (rate * amount).toFixed(2);
-      setResult(`${amount} ${fromCurrency} = ${convertedAmount} ${toCurrency}`);
+      const rate = await getPairConversion(from, to);
+      setRate(rate);
     } catch (err) {
       console.error(err);
       toast.error("Ошибка. Повторите попытку еще раз");
     }
   };
+
+  const displayResult = rate
+    ? `${currencyState.amount} ${currencyState.from} = ${(
+        rate * currencyState.amount
+      ).toFixed(2)} ${currencyState.to}`
+    : null;
+
+  if (isLoading) {
+    return <Loader />;
+  }
+  if (error) {
+    return <p>{error}</p>;
+  }
 
   return (
     <div className={styles.calculateContainer}>
@@ -56,16 +56,20 @@ export const CurrencyCalculate = () => {
             type={"number"}
             label={"Сумма"}
             placeholder={"Введите сумму"}
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            value={currencyState.amount}
+            onChange={(e) =>
+              setCurrencyState((prev) => ({ ...prev, amount: e.target.value }))
+            }
           />
         </div>
         <div className={styles.inpBlock}>
           <SecectS
             id="from"
             label="Из"
-            value={fromCurrency}
-            onChange={(e) => setFromCurrency(e.target.value)}
+            value={currencyState.from}
+            onChange={(e) =>
+              setCurrencyState((prev) => ({ ...prev, from: e.target.value }))
+            }
             currencies={currencies}
           />
         </div>
@@ -73,8 +77,10 @@ export const CurrencyCalculate = () => {
           <SecectS
             id="to"
             label="В"
-            value={toCurrency}
-            onChange={(e) => setFromCurrency(e.target.value)}
+            value={currencyState.to}
+            onChange={(e) =>
+              setCurrencyState((prev) => ({ ...prev, to: e.target.value }))
+            }
             currencies={currencies}
           />
         </div>
@@ -82,7 +88,7 @@ export const CurrencyCalculate = () => {
       <button className={styles.buttonCalculate} onClick={handleCalculate}>
         Рассчитать
       </button>
-      {result && <div className={styles.result}>{result}</div>}
+      {rate && <div className={styles.result}>{displayResult}</div>}
     </div>
   );
 };

@@ -1,6 +1,8 @@
 import styles from "./styles.module.css";
 
 export const SecectS = ({ id, label, value, onChange, currencies }) => {
+  const validCurrencies = currencies ? currencies : [];
+
   return (
     <>
       <label htmlFor={id}>{label}</label>
@@ -10,7 +12,7 @@ export const SecectS = ({ id, label, value, onChange, currencies }) => {
         value={value}
         onChange={onChange}
       >
-        {currencies.map(([code]) => (
+        {validCurrencies.map(([code]) => (
           <option key={code} value={code}>
             {code}
           </option>

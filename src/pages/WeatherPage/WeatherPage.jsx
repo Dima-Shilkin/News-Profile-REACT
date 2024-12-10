@@ -75,7 +75,12 @@ export const WeatherPage = () => {
         ) : isError ? (
           <IncorrectData />
         ) : weatherData ? (
-          <CardWeather weatherData={weatherData} />
+          <CardWeather
+            name={weatherData.name}
+            img={weatherData.img}
+            description={weatherData.description}
+            temperature={weatherData.temperature}
+          />
         ) : null}
       </div>
       <LastRequestCard handleCityClick={handleCityClick} />
