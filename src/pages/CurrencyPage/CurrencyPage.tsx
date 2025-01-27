@@ -21,7 +21,6 @@ export const CurrencyPage = () => {
     getPopularCurrencies,
     baseCurrency
   );
-  console.log(data);
 
   const handleCurrencyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setBaseCurrency(e.target.value);
